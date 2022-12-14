@@ -14,8 +14,8 @@ func TestGenesis(t *testing.T) {
 	genesisState := types.GenesisState{
 		Params: types.DefaultParams(),
 
-		SystemInfo: &types.SystemInfo{
-			NextId: 23,
+		SystemInfo: types.SystemInfo{
+			NextId: 27,
 		},
 		StoredGameList: []types.StoredGame{
 			{
