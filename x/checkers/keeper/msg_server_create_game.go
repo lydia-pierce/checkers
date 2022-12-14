@@ -43,7 +43,7 @@ func (k msgServer) CreateGame(goCtx context.Context, msg *types.MsgCreateGame) (
 			sdk.NewAttribute(types.GameCreatedEventBlack, msg.Black),
 			sdk.NewAttribute(types.GameCreatedEventRed, msg.Red),
 		),
-	)	
+	)
 
 	return &types.MsgCreateGameResponse{
 		GameIndex: newIndex,
