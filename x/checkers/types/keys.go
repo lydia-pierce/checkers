@@ -26,6 +26,10 @@ const (
 )
 
 const (
+    NoFifoIndex = "-1"
+)
+
+const (
 	GameCreatedEventType      = "new-game-created" // Indicates what event type to listen to
 	GameCreatedEventCreator   = "creator"          // Subsidiary information
 	GameCreatedEventGameIndex = "game-index"       // What game is relevant
