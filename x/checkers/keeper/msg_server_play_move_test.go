@@ -64,6 +64,38 @@ func TestPlayMoveCannotParseGame(t *testing.T) {
 	})
 }
 
+func TestPlayMoveSavedGame(t *testing.T) {
+	msgServer, keeper, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	systemInfo, found := keeper.GetSystemInfo(ctx)
+	require.True(t, found)
+	require.EqualValues(t, types.SystemInfo{
+		NextId:        2,
+		FifoHeadIndex: "1",
+		FifoTailIndex: "1",
+	}, systemInfo)
+	game1, found := keeper.GetStoredGame(ctx, "1")
+	require.True(t, found)
+	require.EqualValues(t, types.StoredGame{
+		Index:       "1",
+		Board:       "*b*b*b*b|b*b*b*b*|***b*b*b|**b*****|********|r*r*r*r*|*r*r*r*r|r*r*r*r*",
+		Turn:        "r",
+		Black:       bob,
+		Red:         carol,
+		MoveCount:   1,
+		BeforeIndex: "-1",
+		AfterIndex:  "-1",
+	}, game1)
+}
+
 func TestPlayMoveEmitted(t *testing.T) {
 	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
 	msgServer.PlayMove(context, &types.MsgPlayMove{
@@ -89,6 +121,46 @@ func TestPlayMoveEmitted(t *testing.T) {
 			{Key: "winner", Value: "*"},
 		},
 	}, event)
+}
+
+func TestPlayMove2SavedGame(t *testing.T) {
+	msgServer, keeper, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   carol,
+		GameIndex: "1",
+		FromX:     0,
+		FromY:     5,
+		ToX:       1,
+		ToY:       4,
+	})
+	systemInfo, found := keeper.GetSystemInfo(ctx)
+	require.True(t, found)
+	require.EqualValues(t, types.SystemInfo{
+		NextId:        2,
+		FifoHeadIndex: "1",
+		FifoTailIndex: "1",
+	}, systemInfo)
+	game1, found := keeper.GetStoredGame(ctx, "1")
+	require.True(t, found)
+	require.EqualValues(t, types.StoredGame{
+		Index:       "1",
+		Board:       "*b*b*b*b|b*b*b*b*|***b*b*b|**b*****|*r******|**r*r*r*|*r*r*r*r|r*r*r*r*",
+		Turn:        "b",
+		Black:       bob,
+		Red:         carol,
+		MoveCount:   2,
+		BeforeIndex: "-1",
+		AfterIndex:  "-1",
+	}, game1)
 }
 
 func TestPlayMove2Emitted(t *testing.T) {
@@ -122,4 +194,52 @@ func TestPlayMove2Emitted(t *testing.T) {
 		{Key: "captured-y", Value: "-1"},
 		{Key: "winner", Value: "*"},
 	}, event.Attributes[5:])
+}
+
+func TestPlayMove3SavedGame(t *testing.T) {
+	msgServer, keeper, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   carol,
+		GameIndex: "1",
+		FromX:     0,
+		FromY:     5,
+		ToX:       1,
+		ToY:       4,
+	})
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     2,
+		FromY:     3,
+		ToX:       0,
+		ToY:       5,
+	})
+	systemInfo, found := keeper.GetSystemInfo(ctx)
+	require.True(t, found)
+	require.EqualValues(t, types.SystemInfo{
+		NextId:        2,
+		FifoHeadIndex: "1",
+		FifoTailIndex: "1",
+	}, systemInfo)
+	game1, found := keeper.GetStoredGame(ctx, "1")
+	require.True(t, found)
+	require.EqualValues(t, types.StoredGame{
+		Index:       "1",
+		Board:       "*b*b*b*b|b*b*b*b*|***b*b*b|********|********|b*r*r*r*|*r*r*r*r|r*r*r*r*",
+		Turn:        "r",
+		Black:       bob,
+		Red:         carol,
+		MoveCount:   3,
+		BeforeIndex: "-1",
+		AfterIndex:  "-1",
+	}, game1)
 }
