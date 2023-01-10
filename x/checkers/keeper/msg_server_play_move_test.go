@@ -115,6 +115,7 @@ func TestPlayMoveSavedGame(t *testing.T) {
 
 func TestPlayMoveEmitted(t *testing.T) {
 	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
 	msgServer.PlayMove(context, &types.MsgPlayMove{
 		Creator:   bob,
 		GameIndex: "1",
@@ -123,7 +124,6 @@ func TestPlayMoveEmitted(t *testing.T) {
 		ToX:       2,
 		ToY:       3,
 	})
-	ctx := sdk.UnwrapSDKContext(context)
 	require.NotNil(t, ctx)
 	events := sdk.StringifyEvents(ctx.EventManager().ABCIEvents())
 	require.Len(t, events, 2)
