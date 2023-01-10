@@ -43,18 +43,28 @@ func TestPlayMove(t *testing.T) {
 	}, *playMoveResponse)
 }
 
-func TestPlayMoveCannotParseGame(t *testing.T) {
-	msgServer, k, context := setupMsgServerWithOneGameForPlayMove(t)
-	ctx := sdk.UnwrapSDKContext(context)
-	storedGame, _ := k.GetStoredGame(ctx, "1")
-	storedGame.Board = "not a board"
-	k.SetStoredGame(ctx, storedGame)
-	defer func() {
-		r := recover()
-		require.NotNil(t, r, "The code did not panic")
-		require.Equal(t, r, "game cannot be parsed: invalid board string: not a board")
-	}()
-	msgServer.PlayMove(context, &types.MsgPlayMove{
+func TestPlayMoveGameNotFound(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "2",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	require.Nil(t, playMoveResponse)
+	require.Equal(t, "2: game by id not found", err.Error())
+}
+
+func TestPlayMoveSameBlackRed(t *testing.T) {
+	msgServer, _, context := setupMsgServerCreateGame(t)
+	msgServer.CreateGame(context, &types.MsgCreateGame{
+		Creator: alice,
+		Black:   bob,
+		Red:     bob,
+	})
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
 		Creator:   bob,
 		GameIndex: "1",
 		FromX:     1,
@@ -62,6 +72,12 @@ func TestPlayMoveCannotParseGame(t *testing.T) {
 		ToX:       2,
 		ToY:       3,
 	})
+	require.Nil(t, err)
+	require.EqualValues(t, types.MsgPlayMoveResponse{
+		CapturedX: -1,
+		CapturedY: -1,
+		Winner:    "*",
+	}, *playMoveResponse)
 }
 
 func TestPlayMoveSavedGame(t *testing.T) {
@@ -93,6 +109,7 @@ func TestPlayMoveSavedGame(t *testing.T) {
 		MoveCount:   1,
 		BeforeIndex: "-1",
 		AfterIndex:  "-1",
+		Deadline:    types.FormatDeadline(ctx.BlockTime().Add(types.MaxTurnDuration)),
 	}, game1)
 }
 
@@ -121,6 +138,95 @@ func TestPlayMoveEmitted(t *testing.T) {
 			{Key: "winner", Value: "*"},
 		},
 	}, event)
+}
+
+func TestPlayMoveNotPlayer(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   alice,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	require.Nil(t, playMoveResponse)
+	require.Equal(t, alice+": message creator is not a player", err.Error())
+}
+
+func TestPlayMoveCannotParseGame(t *testing.T) {
+	msgServer, k, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	storedGame, _ := k.GetStoredGame(ctx, "1")
+	storedGame.Board = "not a board"
+	k.SetStoredGame(ctx, storedGame)
+	defer func() {
+		r := recover()
+		require.NotNil(t, r, "The code did not panic")
+		require.Equal(t, r, "game cannot be parsed: invalid board string: not a board")
+	}()
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+}
+
+func TestPlayMoveWrongOutOfTurn(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   carol,
+		GameIndex: "1",
+		FromX:     0,
+		FromY:     5,
+		ToX:       1,
+		ToY:       4,
+	})
+	require.Nil(t, playMoveResponse)
+	require.Equal(t, "{red}: player tried to play out of turn", err.Error())
+}
+
+func TestPlayMoveWrongPieceAtDestination(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     0,
+		ToX:       0,
+		ToY:       1,
+	})
+	require.Nil(t, playMoveResponse)
+	require.Equal(t, "Already piece at destination position: {0 1}: wrong move", err.Error())
+}
+
+func TestPlayMove2(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   carol,
+		GameIndex: "1",
+		FromX:     0,
+		FromY:     5,
+		ToX:       1,
+		ToY:       4,
+	})
+	require.Nil(t, err)
+	require.EqualValues(t, types.MsgPlayMoveResponse{
+		CapturedX: -1,
+		CapturedY: -1,
+		Winner:    "*",
+	}, *playMoveResponse)
 }
 
 func TestPlayMove2SavedGame(t *testing.T) {
@@ -160,6 +266,7 @@ func TestPlayMove2SavedGame(t *testing.T) {
 		MoveCount:   2,
 		BeforeIndex: "-1",
 		AfterIndex:  "-1",
+		Deadline:    types.FormatDeadline(ctx.BlockTime().Add(types.MaxTurnDuration)),
 	}, game1)
 }
 
@@ -194,6 +301,40 @@ func TestPlayMove2Emitted(t *testing.T) {
 		{Key: "captured-y", Value: "-1"},
 		{Key: "winner", Value: "*"},
 	}, event.Attributes[5:])
+}
+
+func TestPlayMove3(t *testing.T) {
+	msgServer, _, context := setupMsgServerWithOneGameForPlayMove(t)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   carol,
+		GameIndex: "1",
+		FromX:     0,
+		FromY:     5,
+		ToX:       1,
+		ToY:       4,
+	})
+	playMoveResponse, err := msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     2,
+		FromY:     3,
+		ToX:       0,
+		ToY:       5,
+	})
+	require.Nil(t, err)
+	require.EqualValues(t, types.MsgPlayMoveResponse{
+		CapturedX: 1,
+		CapturedY: 4,
+		Winner:    "*",
+	}, *playMoveResponse)
 }
 
 func TestPlayMove3SavedGame(t *testing.T) {
@@ -241,5 +382,23 @@ func TestPlayMove3SavedGame(t *testing.T) {
 		MoveCount:   3,
 		BeforeIndex: "-1",
 		AfterIndex:  "-1",
+		Deadline:    types.FormatDeadline(ctx.BlockTime().Add(types.MaxTurnDuration)),
 	}, game1)
+}
+
+func TestSavedPlayedDeadlineIsParseable(t *testing.T) {
+	msgServer, keeper, context := setupMsgServerWithOneGameForPlayMove(t)
+	ctx := sdk.UnwrapSDKContext(context)
+	msgServer.PlayMove(context, &types.MsgPlayMove{
+		Creator:   bob,
+		GameIndex: "1",
+		FromX:     1,
+		FromY:     2,
+		ToX:       2,
+		ToY:       3,
+	})
+	game, found := keeper.GetStoredGame(ctx, "1")
+	require.True(t, found)
+	_, err := game.GetDeadlineAsTime()
+	require.Nil(t, err)
 }

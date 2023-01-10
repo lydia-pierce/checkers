@@ -74,6 +74,8 @@ paths:
                     afterIndex:
                       type: string
                       description: Pertains to the FIFO. Toward tail.
+                    deadline:
+                      type: string
               pagination:
                 type: object
                 properties:
@@ -200,6 +202,8 @@ paths:
                   afterIndex:
                     type: string
                     description: Pertains to the FIFO. Toward tail.
+                  deadline:
+                    type: string
         default:
           description: An unexpected error response.
           schema:
@@ -30822,6 +30826,8 @@ definitions:
             afterIndex:
               type: string
               description: Pertains to the FIFO. Toward tail.
+            deadline:
+              type: string
       pagination:
         type: object
         properties:
@@ -30872,6 +30878,8 @@ definitions:
           afterIndex:
             type: string
             description: Pertains to the FIFO. Toward tail.
+          deadline:
+            type: string
   alice.checkers.checkers.QueryGetSystemInfoResponse:
     type: object
     properties:
@@ -30916,6 +30924,8 @@ definitions:
       afterIndex:
         type: string
         description: Pertains to the FIFO. Toward tail.
+      deadline:
+        type: string
   alice.checkers.checkers.SystemInfo:
     type: object
     properties:
