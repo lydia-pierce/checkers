@@ -59,3 +59,10 @@ const (
 	GameRejectedEventCreator   = "creator"
 	GameRejectedEventGameIndex = "game-index"
 )
+
+const (
+	GameForfeitedEventType      = "game-forfeited"
+	GameForfeitedEventGameIndex = "game-index"
+	GameForfeitedEventWinner    = "winner"
+	GameForfeitedEventBoard     = "board"
+)
