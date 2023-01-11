@@ -20,15 +20,16 @@ func (k msgServer) CreateGame(goCtx context.Context, msg *types.MsgCreateGame) (
 
 	newGame := rules.New()
 	storedGame := types.StoredGame{
-		Index:     newIndex,
-		Board:     newGame.String(),
-		Turn:      rules.PieceStrings[newGame.Turn],
-		Black:     msg.Black,
-		Red:       msg.Red,
-		MoveCount: 0,
+		Index:       newIndex,
+		Board:       newGame.String(),
+		Turn:        rules.PieceStrings[newGame.Turn],
+		Black:       msg.Black,
+		Red:         msg.Red,
+		MoveCount:   0,
 		BeforeIndex: types.NoFifoIndex,
 		AfterIndex:  types.NoFifoIndex,
-		Deadline: types.FormatDeadline(types.GetNextDeadline(ctx)),	
+		Deadline:    types.FormatDeadline(types.GetNextDeadline(ctx)),
+		Winner:      rules.PieceStrings[rules.NO_PLAYER],
 	}
 
 	err := storedGame.Validate()
