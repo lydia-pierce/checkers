@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	keepertest "github.com/alice/checkers/testutil/keeper"
 	"github.com/alice/checkers/testutil/nullify"
+	keepertest "github.com/alice/checkers/x/checkers/testutil/keeper"
 	"github.com/alice/checkers/x/checkers/types"
 )
 

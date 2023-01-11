@@ -6,9 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	keepertest "github.com/alice/checkers/testutil/keeper"
 	"github.com/alice/checkers/testutil/nullify"
 	"github.com/alice/checkers/x/checkers/keeper"
+	keepertest "github.com/alice/checkers/x/checkers/testutil/keeper"
 	"github.com/alice/checkers/x/checkers/types"
 )
 

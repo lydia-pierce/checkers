@@ -35,3 +35,5 @@ WORKDIR /checkers
 COPY go.mod /checkers/go.mod
 RUN go mod download
 RUN rm /checkers/go.mod
+
+ENV PACKAGES curl gcc jq make

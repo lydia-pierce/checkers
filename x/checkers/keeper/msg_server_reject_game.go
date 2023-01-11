@@ -16,9 +16,11 @@ func (k msgServer) RejectGame(goCtx context.Context, msg *types.MsgRejectGame) (
 	if !found {
 		return nil, sdkerrors.Wrapf(types.ErrGameNotFound, "%s", msg.GameIndex)
 	}
+
 	if storedGame.Winner != rules.PieceStrings[rules.NO_PLAYER] {
 		return nil, types.ErrGameFinished
 	}
+
 	if storedGame.Black == msg.Creator {
 		if 0 < storedGame.MoveCount {
 			return nil, types.ErrBlackAlreadyPlayed
@@ -30,6 +32,8 @@ func (k msgServer) RejectGame(goCtx context.Context, msg *types.MsgRejectGame) (
 	} else {
 		return nil, sdkerrors.Wrapf(types.ErrCreatorNotPlayer, "%s", msg.Creator)
 	}
+
+	k.Keeper.MustRefundWager(ctx, &storedGame)
 
 	systemInfo, found := k.Keeper.GetSystemInfo(ctx)
 	if !found {
