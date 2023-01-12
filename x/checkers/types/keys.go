@@ -68,3 +68,9 @@ const (
 	GameForfeitedEventWinner    = "winner"
 	GameForfeitedEventBoard     = "board"
 )
+
+const (
+    CreateGameGas       = 15000 // 54332
+    PlayMoveGas         = 5000 // 68000
+    RejectGameRefundGas = 14000
+)
