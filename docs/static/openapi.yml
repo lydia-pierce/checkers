@@ -144,6 +144,8 @@ paths:
                     wager:
                       type: string
                       format: uint64
+                    denom:
+                      type: string
               pagination:
                 type: object
                 properties:
@@ -277,6 +279,8 @@ paths:
                   wager:
                     type: string
                     format: uint64
+                  denom:
+                    type: string
         default:
           description: An unexpected error response.
           schema:
@@ -30906,6 +30910,8 @@ definitions:
             wager:
               type: string
               format: uint64
+            denom:
+              type: string
       pagination:
         type: object
         properties:
@@ -30970,6 +30976,8 @@ definitions:
           wager:
             type: string
             format: uint64
+          denom:
+            type: string
   alice.checkers.checkers.QueryGetSystemInfoResponse:
     type: object
     properties:
@@ -31021,6 +31029,8 @@ definitions:
       wager:
         type: string
         format: uint64
+      denom:
+        type: string
   alice.checkers.checkers.SystemInfo:
     type: object
     properties:
