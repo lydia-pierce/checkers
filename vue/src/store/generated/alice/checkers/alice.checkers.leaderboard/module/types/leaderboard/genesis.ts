@@ -12,7 +12,7 @@ export interface GenesisState {
   port_id: string;
   playerInfoList: PlayerInfo[];
   /** this line is used by starport scaffolding # genesis/proto/state */
-  board: Board[];
+  board: Board | undefined;
 }
 
 const baseGenesisState: object = { port_id: "" };
@@ -28,8 +28,8 @@ export const GenesisState = {
     for (const v of message.playerInfoList) {
       PlayerInfo.encode(v!, writer.uint32(26).fork()).ldelim();
     }
-    for (const v of message.board) {
-      Board.encode(v!, writer.uint32(34).fork()).ldelim();
+    if (message.board !== undefined) {
+      Board.encode(message.board, writer.uint32(34).fork()).ldelim();
     }
     return writer;
   },
@@ -39,7 +39,6 @@ export const GenesisState = {
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = { ...baseGenesisState } as GenesisState;
     message.playerInfoList = [];
-    message.board = [];
     while (reader.pos < end) {
       const tag = reader.uint32();
       switch (tag >>> 3) {
@@ -55,7 +54,7 @@ export const GenesisState = {
           );
           break;
         case 4:
-          message.board.push(Board.decode(reader, reader.uint32()));
+          message.board = Board.decode(reader, reader.uint32());
           break;
         default:
           reader.skipType(tag & 7);
@@ -68,7 +67,6 @@ export const GenesisState = {
   fromJSON(object: any): GenesisState {
     const message = { ...baseGenesisState } as GenesisState;
     message.playerInfoList = [];
-    message.board = [];
     if (object.params !== undefined && object.params !== null) {
       message.params = Params.fromJSON(object.params);
     } else {
@@ -85,9 +83,9 @@ export const GenesisState = {
       }
     }
     if (object.board !== undefined && object.board !== null) {
-      for (const e of object.board) {
-        message.board.push(Board.fromJSON(e));
-      }
+      message.board = Board.fromJSON(object.board);
+    } else {
+      message.board = undefined;
     }
     return message;
   },
@@ -104,18 +102,14 @@ export const GenesisState = {
     } else {
       obj.playerInfoList = [];
     }
-    if (message.board) {
-      obj.board = message.board.map((e) => (e ? Board.toJSON(e) : undefined));
-    } else {
-      obj.board = [];
-    }
+    message.board !== undefined &&
+      (obj.board = message.board ? Board.toJSON(message.board) : undefined);
     return obj;
   },
 
   fromPartial(object: DeepPartial<GenesisState>): GenesisState {
     const message = { ...baseGenesisState } as GenesisState;
     message.playerInfoList = [];
-    message.board = [];
     if (object.params !== undefined && object.params !== null) {
       message.params = Params.fromPartial(object.params);
     } else {
@@ -132,9 +126,9 @@ export const GenesisState = {
       }
     }
     if (object.board !== undefined && object.board !== null) {
-      for (const e of object.board) {
-        message.board.push(Board.fromPartial(e));
-      }
+      message.board = Board.fromPartial(object.board);
+    } else {
+      message.board = undefined;
     }
     return message;
   },

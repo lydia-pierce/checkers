@@ -14,7 +14,9 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 		k.SetPlayerInfo(ctx, elem)
 	}
 	// Set if defined
-	k.SetBoard(ctx, genState.Board)
+	if genState.Board != nil {
+		k.SetBoard(ctx, genState.Board)
+	}
 	// this line is used by starport scaffolding # genesis/module/init
 	k.SetPort(ctx, genState.PortId)
 	// Only try to bind to port if it is not already bound, since we may already own

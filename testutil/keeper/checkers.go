@@ -48,6 +48,7 @@ func CheckersKeeperWithMocks(t testing.TB, bank *testutil.MockBankEscrowKeeper) 
 		cdc,
 		storeKey,
 		memStoreKey,
+		paramsSubspace,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
