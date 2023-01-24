@@ -8,7 +8,7 @@ import (
 	"github.com/alice/checkers/x/checkers"
 	"github.com/alice/checkers/x/checkers/keeper"
 	"github.com/alice/checkers/x/checkers/testutil"
-	keepertest "github.com/alice/checkers/x/checkers/testutil/keeper"
+	keepertest "github.com/alice/checkers/testutil/keeper"
 	"github.com/alice/checkers/x/checkers/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/golang/mock/gomock"
