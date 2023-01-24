@@ -41,14 +41,13 @@ func CheckersKeeperWithMocks(t testing.TB, bank *testutil.MockBankEscrowKeeper) 
 		memStoreKey,
 		"CheckersParams",
 	)
-    leaderboardKeeper,_ := LeaderboardKeeper(t);
-    k := keeper.NewKeeper(
-        bank,
-        *leaderboardKeeper,
-        cdc,
-        storeKey,
-        memStoreKey,
-
+	leaderboardKeeper, _ := LeaderboardKeeper(t)
+	k := keeper.NewKeeper(
+		bank,
+		*leaderboardKeeper,
+		cdc,
+		storeKey,
+		memStoreKey,
 	)
 
 	ctx := sdk.NewContext(stateStore, tmproto.Header{}, false, log.NewNopLogger())
